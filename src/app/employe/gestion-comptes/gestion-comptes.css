@@ -1,0 +1,179 @@
+@import '../gestion-clients/gestion-clients.css';
+
+.compte-row {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.compte-row:hover {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  transform: scale(1.01);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.solde-info {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.solde-amount {
+  font-size: 1.25rem;
+  color: #0d6efd;
+  font-weight: 700;
+}
+
+.solde-devise {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.badge-type {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge-type.bg-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #0dcaf0 100%) !important;
+  color: white;
+}
+
+.badge-type.bg-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  color: white;
+}
+
+.badge-statut {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.badge-statut.bg-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%) !important;
+  color: #000;
+}
+
+.badge-statut.bg-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  color: white;
+}
+
+.badge-statut.bg-danger {
+  background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%) !important;
+  color: white;
+}
+
+.info-spec {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-action {
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  background: linear-gradient(135deg, #17a2b8 0%, #0dcaf0 100%);
+  color: white;
+}
+
+.btn-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+}
+
+.info-box-highlight {
+  background: linear-gradient(135deg, #e7f3ff 0%, #cfe2ff 100%);
+  border-left-color: #0d6efd;
+  border-left-width: 5px;
+}
+
+.info-value-lg {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+}
+
+.info-value-sm {
+  font-size: 0.95rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+
+.badge-type,
+.badge-statut {
+  animation: fadeIn 0.5s ease-out;
+}
+
+
+@media (max-width: 991px) {
+  .solde-amount {
+    font-size: 1.1rem;
+  }
+
+  .badge-type {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .info-spec {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .table-modern {
+    font-size: 0.85rem;
+  }
+
+  .solde-info {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .badge-type i {
+    display: none;
+  }
+}
+
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+
+select.form-select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%230d6efd' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+}
+
+
+small.text-muted {
+  font-size: 0.875rem;
+  color: #6c757d !important;
+  font-style: italic;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}

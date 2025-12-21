@@ -1,0 +1,301 @@
+<div class="gestion-clients-page">
+  <!-- En-tête -->
+  <div class="page-header mb-4">
+    <div>
+      <h2 class="page-title mb-2">
+        <i class="bi bi-people-fill text-primary me-2"></i>
+        Gestion des Clients
+      </h2>
+      <p class="text-muted mb-0">Gérez tous vos clients en un seul endroit</p>
+    </div>
+  </div>
+
+  <!-- Barre de recherche et bouton -->
+  <div class="card search-card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-center">
+        <div class="col-lg-9">
+          <div class="input-group input-group-lg search-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Rechercher un client par nom ou email..."
+              [(ngModel)]="searchKeyword"
+              (input)="onSearchChange()">
+          </div>
+        </div>
+        <div class="col-lg-3">
+          <button class="btn btn-primary btn-lg w-100 btn-modern" (click)="showAddClientModal()">
+            <i class="bi bi-person-plus me-2"></i>
+            Nouveau Client
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary spinner-modern"></div>
+    <p class="mt-3 text-muted">Chargement des clients...</p>
+  </div>
+
+  <!-- Liste des clients -->
+  <div *ngIf="!loading" class="card shadow-sm table-card">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="bi bi-table me-2"></i>
+        Liste des Clients
+      </h5>
+    </div>
+    <div class="card-body p-0">
+      <div *ngIf="clients.length === 0" class="empty-state text-center py-5">
+        <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+        <p class="text-muted fs-5 mb-3">Aucun client trouvé</p>
+        <button class="btn btn-primary btn-lg" (click)="showAddClientModal()">
+          <i class="bi bi-person-plus me-2"></i>
+          Ajouter le premier client
+        </button>
+      </div>
+
+      <div *ngIf="clients.length > 0" class="table-responsive">
+        <table class="table table-hover table-modern mb-0">
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>Client</th>
+            <th>Email</th>
+            <th class="text-center">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let client of clients" class="client-row">
+            <td class="align-middle">
+              <span class="badge badge-id">#{{ client.id }}</span>
+            </td>
+            <td class="align-middle">
+              <div class="client-info">
+                <i class="bi bi-person-circle text-primary me-2"></i>
+                <strong>{{ client.nom }}</strong>
+              </div>
+            </td>
+            <td class="align-middle">
+              <div class="email-info">
+                <i class="bi bi-envelope me-2 text-muted"></i>
+                {{ client.email }}
+              </div>
+            </td>
+            <td class="text-center align-middle">
+              <div class="btn-group action-buttons" role="group">
+                <button
+                  class="btn btn-info btn-sm"
+                  (click)="viewClientDetails(client)"
+                  title="Voir les détails">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button
+                  class="btn btn-warning btn-sm"
+                  (click)="editClient(client)"
+                  title="Modifier">
+                  <i class="bi bi-pencil"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="clients.length > 0" class="card-footer">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="text-muted">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>{{ clients.length }}</strong> client(s) trouvé(s)
+          </span>
+          <span class="text-muted">
+            <i class="bi bi-clock me-2"></i>
+            {{ now | date:'short' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ajouter Client -->
+<div class="modal fade" [class.show]="showModalAdd" [style.display]="showModalAdd ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-modern">
+    <div class="modal-content">
+      <div class="modal-header modal-header-primary">
+        <h5 class="modal-title">
+          <i class="bi bi-person-plus me-2"></i>
+          Nouveau Client
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-4">
+          <label class="form-label fw-bold">
+            <i class="bi bi-person me-2"></i>Nom complet
+          </label>
+          <input type="text" class="form-control form-control-lg" [(ngModel)]="newClient.nom" >
+        </div>
+        <div class="mb-4">
+          <label class="form-label fw-bold">
+            <i class="bi bi-envelope me-2"></i>Email
+          </label>
+          <input type="email" class="form-control form-control-lg" [(ngModel)]="newClient.email" >
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">
+          <i class="bi bi-x-circle me-2"></i>Annuler
+        </button>
+        <button type="button" class="btn btn-primary" (click)="saveClient()" [disabled]="savingClient">
+          <span *ngIf="!savingClient">
+            <i class="bi bi-check-circle me-2"></i>Enregistrer
+          </span>
+          <span *ngIf="savingClient">
+            <span class="spinner-border spinner-border-sm me-2"></span>Enregistrement...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showModalAdd" *ngIf="showModalAdd"></div>
+
+<!-- Modal Modifier Client -->
+<div class="modal fade" [class.show]="showModalEdit" [style.display]="showModalEdit ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-modern">
+    <div class="modal-content">
+      <div class="modal-header modal-header-warning">
+        <h5 class="modal-title">
+          <i class="bi bi-pencil me-2"></i>
+          Modifier le Client
+        </h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedClient">
+        <div class="mb-4">
+          <label class="form-label fw-bold">
+            <i class="bi bi-person me-2"></i>Nom complet
+          </label>
+          <input type="text" class="form-control form-control-lg" [(ngModel)]="selectedClient.nom">
+        </div>
+        <div class="mb-4">
+          <label class="form-label fw-bold">
+            <i class="bi bi-envelope me-2"></i>Email
+          </label>
+          <input type="email" class="form-control form-control-lg" [(ngModel)]="selectedClient.email">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+        <button type="button" class="btn btn-warning" (click)="updateClient()" [disabled]="savingClient">
+          <span *ngIf="!savingClient">
+            <i class="bi bi-check-circle me-2"></i>Mettre à jour
+          </span>
+          <span *ngIf="savingClient">
+            <span class="spinner-border spinner-border-sm me-2"></span>Mise à jour...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showModalEdit" *ngIf="showModalEdit"></div>
+
+<!-- Modal Détails Client -->
+<div class="modal fade" [class.show]="showModalView" [style.display]="showModalView ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-modern">
+    <div class="modal-content">
+      <div class="modal-header modal-header-info">
+        <h5 class="modal-title">
+          <i class="bi bi-eye me-2"></i>
+          Détails du Client
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedClient">
+        <div class="row mb-4">
+          <div class="col-md-6 mb-3">
+            <div class="info-box">
+              <label class="info-label">ID</label>
+              <p class="info-value">#{{ selectedClient.id }}</p>
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <div class="info-box">
+              <label class="info-label">Nom complet</label>
+              <p class="info-value">{{ selectedClient.nom }}</p>
+            </div>
+          </div>
+          <div class="col-md-12 mb-3">
+            <div class="info-box">
+              <label class="info-label">Email</label>
+              <p class="info-value">{{ selectedClient.email }}</p>
+            </div>
+          </div>
+        </div>
+
+        <hr>
+
+        <h6 class="section-title mb-3">
+          <i class="bi bi-wallet2 me-2"></i>
+          Comptes bancaires
+        </h6>
+
+        <div *ngIf="loadingComptes" class="text-center py-3">
+          <div class="spinner-border text-primary"></div>
+          <p class="mt-2">Chargement des comptes...</p>
+        </div>
+
+        <div *ngIf="!loadingComptes && clientComptes.length === 0" class="alert alert-warning">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Ce client n'a aucun compte bancaire
+        </div>
+
+        <div *ngIf="!loadingComptes && clientComptes.length > 0" class="table-responsive">
+          <table class="table table-sm table-modern">
+            <thead>
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Solde</th>
+              <th>Statut</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let compte of clientComptes">
+              <td>#{{ compte.id }}</td>
+              <td>
+                <span class="badge" [ngClass]="compte.typeCompte === 'Compte Courant' ? 'bg-info' : 'bg-success'">
+                  {{ compte.typeCompte }}
+                </span>
+              </td>
+              <td class="fw-bold">{{ compte.solde | number:'1.2-2' }} {{ compte.devise }}</td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'bg-warning': compte.statut === 'CREATED',
+                  'bg-success': compte.statut === 'ACTIVATED',
+                  'bg-danger': compte.statut === 'SUSPENDED'
+                }">
+                  {{ compte.statut }}
+                </span>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showModalView" *ngIf="showModalView"></div>

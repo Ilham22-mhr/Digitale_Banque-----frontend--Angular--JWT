@@ -1,0 +1,320 @@
+<div class="gestion-comptes-page">
+
+  <div class="page-header mb-4">
+    <div>
+      <h2 class="page-title mb-2">
+        <i class="bi bi-wallet2 text-primary me-2"></i>
+        Gestion des Comptes
+      </h2>
+      <p class="text-muted mb-0">Créer et gérer les comptes bancaires</p>
+    </div>
+  </div>
+
+
+  <div class="card search-card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-center">
+        <div class="col-lg-9">
+          <div class="input-group input-group-lg search-group">
+            <span class="input-group-text">
+              <i class="bi bi-person"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Rechercher un compte par nom client..."
+              [(ngModel)]="searchClientName"
+              (input)="onSearchChange()">
+          </div>
+          <small class="text-muted mt-2 d-block">
+            <i class="bi bi-info-circle me-1"></i>
+
+          </small>
+        </div>
+        <div class="col-lg-3">
+          <button class="btn btn-primary btn-lg w-100 btn-modern" (click)="showAddCompteModal()">
+            <i class="bi bi-plus-circle me-2"></i>
+            Nouveau Compte
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary spinner-modern"></div>
+    <p class="mt-3 text-muted">Chargement des comptes...</p>
+  </div>
+
+  <div *ngIf="!loading" class="card shadow-sm table-card">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="bi bi-table me-2"></i>
+        Comptes Bancaires
+      </h5>
+    </div>
+    <div class="card-body p-0">
+      <div *ngIf="comptes.length === 0" class="empty-state text-center py-5">
+        <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+        <p class="text-muted fs-5 mb-3">Aucun compte trouvé</p>
+        <button class="btn btn-primary btn-lg" (click)="showAddCompteModal()">
+          <i class="bi bi-plus-circle me-2"></i>
+          Créer le premier compte
+        </button>
+      </div>
+
+      <div *ngIf="comptes.length > 0" class="table-responsive">
+        <table class="table table-hover table-modern mb-0">
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>Client</th>
+            <th>Type</th>
+            <th>Solde</th>
+            <th>Statut</th>
+            <th>Info</th>
+            <th class="text-center">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let compte of comptes" class="compte-row">
+            <td class="align-middle">
+              <span class="badge badge-id">#{{ compte.id }}</span>
+            </td>
+            <td class="align-middle">
+              <div class="client-info">
+                <i class="bi bi-person-circle text-primary me-2"></i>
+                <strong>{{ compte.clientNom }}</strong>
+              </div>
+            </td>
+            <td class="align-middle">
+              <span class="badge badge-type" [ngClass]="getTypeBadgeClass(compte.typeCompte)">
+                <i [class]="compte.typeCompte === 'Compte Courant' ? 'bi bi-credit-card' : 'bi bi-piggy-bank'"></i>
+                {{ compte.typeCompte }}
+              </span>
+            </td>
+            <td class="align-middle">
+              <div class="solde-info">
+                <strong class="solde-amount">{{ compte.solde | number:'1.2-2' }}</strong>
+                <span class="solde-devise">{{ compte.devise }}</span>
+              </div>
+            </td>
+            <td class="align-middle">
+              <span class="badge badge-statut" [ngClass]="getStatutBadgeClass(compte.statut)">
+                {{ getStatutText(compte.statut) }}
+              </span>
+            </td>
+            <td class="align-middle">
+              <span *ngIf="compte.decouvert !== null" class="info-spec">
+                <i class="bi bi-cash-stack me-1"></i>
+                {{ compte.decouvert }} {{ compte.devise }}
+              </span>
+              <span *ngIf="compte.tauxInteret !== null" class="info-spec text-success">
+                <i class="bi bi-percent me-1"></i>
+                {{ compte.tauxInteret }}%
+              </span>
+            </td>
+            <td class="text-center align-middle">
+              <button
+                class="btn btn-info btn-sm btn-action"
+                (click)="viewCompteDetails(compte)"
+                title="Voir détails">
+                <i class="bi bi-eye"></i>
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="comptes.length > 0" class="card-footer">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="text-muted">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>{{ comptes.length }}</strong> compte(s) trouvé(s)
+          </span>
+          <span class="text-muted">
+            <i class="bi bi-clock me-2"></i>
+            {{ now | date:'short' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" [class.show]="showModalAdd" [style.display]="showModalAdd ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-modern">
+    <div class="modal-content">
+      <div class="modal-header modal-header-primary">
+        <h5 class="modal-title">
+          <i class="bi bi-plus-circle me-2"></i>
+          Créer un Compte Bancaire
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="compteForm">
+          <div class="mb-4">
+            <label class="form-label fw-bold">
+              <i class="bi bi-person me-2"></i>Client
+            </label>
+            <select class="form-select form-select-lg" formControlName="clientId">
+              <option value="">-- Sélectionner un client --</option>
+              <option *ngFor="let client of clients" [value]="client.id">
+                {{ client.nom }} ({{ client.email }})
+              </option>
+            </select>
+            <div *ngIf="compteForm.get('clientId')?.invalid && compteForm.get('clientId')?.touched" class="text-danger small mt-1">
+              Le client est requis
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">
+              <i class="bi bi-card-list me-2"></i>Type de Compte
+            </label>
+            <select class="form-select form-select-lg" formControlName="typeCompte">
+              <option value="COURANT">Compte Courant</option>
+              <option value="EPARGNE">Compte Épargne</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <label class="form-label fw-bold">
+                <i class="bi bi-cash me-2"></i>Solde Initial
+              </label>
+              <input type="number" class="form-control form-control-lg" formControlName="solde" step="0.01" min="0">
+              <div *ngIf="compteForm.get('solde')?.invalid && compteForm.get('solde')?.touched" class="text-danger small mt-1">
+                Le solde est requis
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+              <label class="form-label fw-bold">
+                <i class="bi bi-currency-exchange me-2"></i>Devise
+              </label>
+              <select class="form-select form-select-lg" formControlName="devise">
+                <option value="MAD">MAD (Dirham)</option>
+                <option value="EUR">EUR (Euro)</option>
+                <option value="USD">USD (Dollar)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-4" *ngIf="compteForm.get('typeCompte')?.value === 'COURANT'">
+            <label class="form-label fw-bold">
+              <i class="bi bi-shield-check me-2"></i>Découvert Autorisé
+            </label>
+            <input type="number" class="form-control form-control-lg" formControlName="decouvert" step="0.01" min="0">
+            <small class="text-muted">Montant maximum que le client peut dépasser</small>
+          </div>
+
+          <div class="mb-4" *ngIf="compteForm.get('typeCompte')?.value === 'EPARGNE'">
+            <label class="form-label fw-bold">
+              <i class="bi bi-percent me-2"></i>Taux d'Intérêt (%)
+            </label>
+            <input type="number" class="form-control form-control-lg" formControlName="tauxInteret" step="0.1" min="0">
+            <small class="text-muted">Taux d'intérêt annuel appliqué</small>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">
+          <i class="bi bi-x-circle me-2"></i>Annuler
+        </button>
+        <button type="button" class="btn btn-primary" (click)="saveCompte()" [disabled]="compteForm.invalid || savingCompte">
+          <span *ngIf="!savingCompte">
+            <i class="bi bi-check-circle me-2"></i>Créer le Compte
+          </span>
+          <span *ngIf="savingCompte">
+            <span class="spinner-border spinner-border-sm me-2"></span>Création...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showModalAdd" *ngIf="showModalAdd"></div>
+
+<div class="modal fade" [class.show]="showModalView" [style.display]="showModalView ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-modern">
+    <div class="modal-content">
+      <div class="modal-header modal-header-info">
+        <h5 class="modal-title">
+          <i class="bi bi-eye me-2"></i>
+          Détails du Compte
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedCompte">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <div class="info-box">
+              <label class="info-label">ID</label>
+              <p class="info-value">#{{ selectedCompte.id }}</p>
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <div class="info-box">
+              <label class="info-label">Client</label>
+              <p class="info-value">{{ selectedCompte.clientNom }}</p>
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <div class="info-box">
+              <label class="info-label">Type</label>
+              <p class="info-value">
+                <span class="badge" [ngClass]="getTypeBadgeClass(selectedCompte.typeCompte)">
+                  {{ selectedCompte.typeCompte }}
+                </span>
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <div class="info-box">
+              <label class="info-label">Statut</label>
+              <p class="info-value">
+                <span class="badge" [ngClass]="getStatutBadgeClass(selectedCompte.statut)">
+                  {{ getStatutText(selectedCompte.statut) }}
+                </span>
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <div class="info-box info-box-highlight">
+              <label class="info-label">Solde</label>
+              <p class="info-value-lg text-primary">
+                {{ selectedCompte.solde | number:'1.2-2' }} {{ selectedCompte.devise }}
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <div class="info-box">
+              <label class="info-label">Date de création</label>
+              <p class="info-value-sm">{{ selectedCompte.dateCreation | date:'medium' }}</p>
+            </div>
+          </div>
+          <div class="col-md-12 mb-3" *ngIf="selectedCompte.decouvert !== null">
+            <div class="info-box">
+              <label class="info-label">Découvert autorisé</label>
+              <p class="info-value">{{ selectedCompte.decouvert }} {{ selectedCompte.devise }}</p>
+            </div>
+          </div>
+          <div class="col-md-12 mb-3" *ngIf="selectedCompte.tauxInteret !== null">
+            <div class="info-box">
+              <label class="info-label">Taux d'intérêt</label>
+              <p class="info-value text-success">{{ selectedCompte.tauxInteret }}%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showModalView" *ngIf="showModalView"></div>

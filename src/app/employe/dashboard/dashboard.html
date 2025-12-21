@@ -1,0 +1,150 @@
+
+<div class="dashboard">
+  <!-- En-tête du Dashboard -->
+  <div class="mb-4">
+    <h2 class="dashboard-title mb-2">
+      <i class="bi bi-speedometer2 text-primary me-2"></i>
+      Tableau de Bord
+    </h2>
+    <p class="text-muted">Vue d'ensemble de votre activité bancaire</p>
+  </div>
+
+  <!-- Conteneur principal avec graphique et statistiques côte à côte -->
+  <div class="row g-4 mb-4">
+    <!-- Colonne Graphique -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0 fw-bold">
+            <i class="bi bi-pie-chart text-primary me-2"></i>
+            Répartition des Comptes
+          </h5>
+        </div>
+        <div class="card-body d-flex align-items-center justify-content-center">
+          <canvas *ngIf="chartData"
+                  baseChart
+                  [data]="chartData"
+                  [type]="'pie'"
+                  [options]="chartOptions">
+          </canvas>
+          <div *ngIf="!chartData" class="text-center py-5">
+            <div class="spinner-border text-primary"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Colonne Statistiques -->
+    <div class="col-lg-6">
+      <div class="stats-container h-100 d-flex flex-column justify-content-between">
+        <!-- Card Total Clients -->
+        <div class="card stat-card bg-gradient-primary text-white mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-uppercase mb-2 opacity-90">Total Clients</h6>
+                <h1 class="mb-0 display-4 fw-bold">{{ stats.totalClients }}</h1>
+              </div>
+              <div class="stat-icon">
+                <i class="bi bi-people fs-1 opacity-75"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Total Comptes -->
+        <div class="card stat-card bg-gradient-success text-white mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-uppercase mb-2 opacity-90">Total Comptes</h6>
+                <h1 class="mb-0 display-4 fw-bold">{{ stats.totalComptes }}</h1>
+              </div>
+              <div class="stat-icon">
+                <i class="bi bi-wallet2 fs-1 opacity-75"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Opérations -->
+        <div class="card stat-card bg-gradient-info text-white">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-uppercase mb-2 opacity-90">Opérations Totales</h6>
+                <h1 class="mb-0 display-4 fw-bold">{{ stats.operationsToday }}</h1>
+              </div>
+              <div class="stat-icon">
+                <i class="bi bi-arrow-left-right fs-1 opacity-75"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dernières Opérations -->
+  <div class="card shadow-sm operations-card">
+    <div class="card-header bg-gradient-light border-0">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold text-dark">
+          <i class="bi bi-clock-history text-info me-2"></i>
+          Dernières Opérations
+        </h5>
+        <span class="badge bg-primary rounded-pill px-3">5 récentes</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div *ngIf="loading" class="text-center py-4">
+        <div class="spinner-border text-primary"></div>
+        <p class="mt-2 text-muted">Chargement...</p>
+      </div>
+
+      <div *ngIf="!loading && dernieresOperations.length === 0" class="text-center py-5">
+        <i class="bi bi-inbox fs-1 text-muted"></i>
+        <p class="text-muted mt-3">Aucune opération récente</p>
+      </div>
+
+      <div *ngIf="!loading && dernieresOperations.length > 0" class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+          <tr>
+            <th class="fw-bold">Date & Heure</th>
+            <th class="fw-bold">Type</th>
+            <th class="fw-bold text-end">Montant</th>
+            <th class="fw-bold">Description</th>
+            <th class="fw-bold text-center">Compte</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let op of dernieresOperations" class="operation-row">
+            <td>
+              <i class="bi bi-calendar3 text-muted me-2"></i>
+              {{ op.dateOp | date:'short' }}
+            </td>
+            <td>
+              <span class="badge badge-modern" [ngClass]="op.type === 'CREDIT' ? 'badge-success' : 'badge-danger'">
+                <i [class]="op.type === 'CREDIT' ? 'bi bi-arrow-down-circle' : 'bi bi-arrow-up-circle'"></i>
+                {{ op.type === 'CREDIT' ? 'Crédit' : 'Débit' }}
+              </span>
+            </td>
+            <td class="text-end">
+              <span class="montant fw-bold" [ngClass]="op.type === 'CREDIT' ? 'text-success' : 'text-danger'">
+                {{ op.type === 'CREDIT' ? '+' : '-' }}{{ op.montant | number:'1.2-2' }} DH
+              </span>
+            </td>
+            <td>
+              <span class="text-muted">{{ op.description }}</span>
+            </td>
+            <td class="text-center">
+              <span class="badge bg-secondary">#{{ op.compteId }}</span>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

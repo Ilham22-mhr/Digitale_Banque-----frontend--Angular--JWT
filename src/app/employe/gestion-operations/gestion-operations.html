@@ -1,0 +1,293 @@
+<div class="gestion-operations-page">
+  <div class="page-header mb-4">
+    <div>
+      <h2 class="page-title mb-2">
+        <i class="bi bi-arrow-left-right text-primary me-2"></i>
+        Gestion des Opérations
+      </h2>
+      <p class="text-muted mb-0">Effectuer des versements, retraits et virements</p>
+    </div>
+  </div>
+
+  <div class="card operations-card shadow-sm mb-4">
+    <div class="card-body p-4">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <button class="btn btn-operation btn-versement w-100" (click)="openOperationModal('VERSEMENT')">
+            <div class="operation-icon">
+              <i class="bi bi-arrow-down-circle"></i>
+            </div>
+            <div class="operation-content">
+              <strong class="operation-title">Versement</strong>
+              <p class="operation-desc">Ajouter de l'argent</p>
+            </div>
+          </button>
+        </div>
+        <div class="col-md-4">
+          <button class="btn btn-operation btn-retrait w-100" (click)="openOperationModal('RETRAIT')">
+            <div class="operation-icon">
+              <i class="bi bi-arrow-up-circle"></i>
+            </div>
+            <div class="operation-content">
+              <strong class="operation-title">Retrait</strong>
+              <p class="operation-desc">Retirer de l'argent</p>
+            </div>
+          </button>
+        </div>
+        <div class="col-md-4">
+          <button class="btn btn-operation btn-virement w-100" (click)="openOperationModal('VIREMENT')">
+            <div class="operation-icon">
+              <i class="bi bi-arrow-left-right"></i>
+            </div>
+            <div class="operation-content">
+              <strong class="operation-title">Virement</strong>
+              <p class="operation-desc">Transférer entre comptes</p>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm history-card">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="bi bi-clock-history me-2"></i>
+        Historique des Opérations
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row mb-4">
+        <div class="col-md-12">
+          <label class="form-label fw-bold">
+            <i class="bi bi-wallet2 me-2"></i>Sélectionner un compte
+          </label>
+          <select class="form-select form-select-lg select-modern" [(ngModel)]="selectedCompteId" (change)="onCompteChange()">
+            <option [value]="null">-- Choisir un compte --</option>
+            <option *ngFor="let compte of comptes" [value]="compte.id">
+              #{{ compte.id }} - {{ compte.clientNom }} - {{ compte.typeCompte }} ({{ compte.solde | number:'1.2-2' }} {{ compte.devise }})
+            </option>
+          </select>
+        </div>
+      </div>
+
+
+      <div *ngIf="loadingOperations" class="text-center py-5">
+        <div class="spinner-border text-primary spinner-modern"></div>
+        <p class="mt-3 text-muted">Chargement des opérations...</p>
+      </div>
+
+      <div *ngIf="!selectedCompteId && !loadingOperations" class="alert alert-modern alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        Veuillez sélectionner un compte pour voir l'historique des opérations
+      </div>
+
+      <div *ngIf="selectedCompteId && !loadingOperations">
+        <div *ngIf="operations.length === 0" class="alert alert-modern alert-warning">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Aucune opération trouvée pour ce compte
+        </div>
+
+        <div *ngIf="operations.length > 0" class="operations-list">
+          <div *ngFor="let operation of operations" class="operation-item">
+            <div class="operation-header">
+              <div class="operation-date">
+                <i class="bi bi-calendar3 me-2"></i>
+                {{ operation.dateOp | date:'dd/MM/yyyy à HH:mm' }}
+              </div>
+              <span class="operation-badge" [ngClass]="operation.type === 'CREDIT' ? 'badge-credit' : 'badge-debit'">
+                <i [class]="operation.type === 'CREDIT' ? 'bi bi-arrow-down-circle' : 'bi bi-arrow-up-circle'"></i>
+                {{ operation.type === 'CREDIT' ? 'Crédit' : 'Débit' }}
+              </span>
+            </div>
+            <div class="operation-body">
+              <div class="operation-description">
+                <i class="bi bi-chat-left-dots me-2"></i>
+                {{ operation.description }}
+              </div>
+              <div class="operation-amount" [ngClass]="operation.type === 'CREDIT' ? 'amount-credit' : 'amount-debit'">
+                {{ operation.type === 'CREDIT' ? '+' : '-' }} {{ operation.montant | number:'1.2-2' }} DH
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" [class.show]="showModalOperation" [style.display]="showModalOperation ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-modern">
+    <div class="modal-content">
+      <div class="modal-header"
+           [ngClass]="{
+             'modal-header-success': operationType === 'VERSEMENT',
+             'modal-header-warning': operationType === 'RETRAIT',
+             'modal-header-info': operationType === 'VIREMENT'
+           }">
+        <h5 class="modal-title">
+          <i class="bi me-2"
+             [ngClass]="{
+               'bi-arrow-down-circle': operationType === 'VERSEMENT',
+               'bi-arrow-up-circle': operationType === 'RETRAIT',
+               'bi-arrow-left-right': operationType === 'VIREMENT'
+             }"></i>
+          {{ operationType }}
+        </h5>
+        <button type="button" class="btn-close" [class.btn-close-white]="operationType !== 'RETRAIT'" (click)="closeModal()"></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Formulaire VERSEMENT -->
+        <form *ngIf="operationType === 'VERSEMENT'" [formGroup]="versementForm">
+          <div class="mb-4">
+            <label class="form-label fw-bold">
+              <i class="bi bi-wallet2 me-2"></i>Compte bénéficiaire
+            </label>
+            <select class="form-select form-select-lg" formControlName="compteId">
+              <option value="">-- Sélectionner un compte --</option>
+              <option *ngFor="let compte of comptes" [value]="compte.id">
+                #{{ compte.id }} - {{ compte.clientNom }} - {{ compte.typeCompte }}
+              </option>
+            </select>
+            <div *ngIf="versementForm.get('compteId')?.invalid && versementForm.get('compteId')?.touched" class="text-danger small mt-1">
+              Le compte est requis
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">
+              <i class="bi bi-cash-stack me-2"></i>Montant
+            </label>
+            <input type="number" class="form-control form-control-lg" formControlName="montant" step="0.01" min="0.01" placeholder="Ex: 1000">
+            <div *ngIf="versementForm.get('montant')?.invalid && versementForm.get('montant')?.touched" class="text-danger small mt-1">
+              Le montant doit être supérieur à 0
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">
+              <i class="bi bi-chat-left-text me-2"></i>Description
+            </label>
+            <textarea class="form-control" formControlName="description" rows="3" placeholder="Ex: Dépôt d'espèces"></textarea>
+            <div *ngIf="versementForm.get('description')?.invalid && versementForm.get('description')?.touched" class="text-danger small mt-1">
+              La description est requise
+            </div>
+          </div>
+        </form>
+
+        <form *ngIf="operationType === 'RETRAIT'" [formGroup]="retraitForm">
+          <div class="mb-4">
+            <label class="form-label fw-bold">
+              <i class="bi bi-wallet2 me-2"></i>Compte à débiter
+            </label>
+            <select class="form-select form-select-lg" formControlName="compteId">
+              <option value="">-- Sélectionner un compte --</option>
+              <option *ngFor="let compte of comptes" [value]="compte.id">
+                #{{ compte.id }} - {{ compte.clientNom }} - Solde: {{ compte.solde | number:'1.2-2' }} {{ compte.devise }}
+              </option>
+            </select>
+            <div *ngIf="retraitForm.get('compteId')?.invalid && retraitForm.get('compteId')?.touched" class="text-danger small mt-1">
+              Le compte est requis
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">
+              <i class="bi bi-cash-stack me-2"></i>Montant
+            </label>
+            <input type="number" class="form-control form-control-lg" formControlName="montant" step="0.01" min="0.01" placeholder="Ex: 500">
+            <div *ngIf="retraitForm.get('montant')?.invalid && retraitForm.get('montant')?.touched" class="text-danger small mt-1">
+              Le montant doit être supérieur à 0
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">
+              <i class="bi bi-chat-left-text me-2"></i>Description
+            </label>
+            <textarea class="form-control" formControlName="description" rows="3" placeholder="Ex: Retrait d'espèces"></textarea>
+            <div *ngIf="retraitForm.get('description')?.invalid && retraitForm.get('description')?.touched" class="text-danger small mt-1">
+              La description est requise
+            </div>
+          </div>
+        </form>
+
+        <form *ngIf="operationType === 'VIREMENT'" [formGroup]="virementForm">
+          <div class="mb-4">
+            <label class="form-label fw-bold">
+              <i class="bi bi-arrow-up me-2"></i>Compte source (débiter)
+            </label>
+            <select class="form-select form-select-lg" formControlName="compteSource">
+              <option value="">-- Sélectionner le compte source --</option>
+              <option *ngFor="let compte of comptes" [value]="compte.id">
+                #{{ compte.id }} - {{ compte.clientNom }} - {{ compte.solde | number:'1.2-2' }} {{ compte.devise }}
+              </option>
+            </select>
+            <div *ngIf="virementForm.get('compteSource')?.invalid && virementForm.get('compteSource')?.touched" class="text-danger small mt-1">
+              Le compte source est requis
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">
+              <i class="bi bi-arrow-down me-2"></i>Compte destination (créditer)
+            </label>
+            <select class="form-select form-select-lg" formControlName="compteDestination">
+              <option value="">-- Sélectionner le compte destination --</option>
+              <option *ngFor="let compte of comptes" [value]="compte.id">
+                #{{ compte.id }} - {{ compte.clientNom }} - {{ compte.typeCompte }}
+              </option>
+            </select>
+            <div *ngIf="virementForm.get('compteDestination')?.invalid && virementForm.get('compteDestination')?.touched" class="text-danger small mt-1">
+              Le compte destination est requis
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">
+              <i class="bi bi-cash-stack me-2"></i>Montant
+            </label>
+            <input type="number" class="form-control form-control-lg" formControlName="montant" step="0.01" min="0.01" placeholder="Ex: 750">
+            <div *ngIf="virementForm.get('montant')?.invalid && virementForm.get('montant')?.touched" class="text-danger small mt-1">
+              Le montant doit être supérieur à 0
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">
+              <i class="bi bi-chat-left-text me-2"></i>Description
+            </label>
+            <textarea class="form-control" formControlName="description" rows="3" placeholder="Ex: Virement pour achat"></textarea>
+            <div *ngIf="virementForm.get('description')?.invalid && virementForm.get('description')?.touched" class="text-danger small mt-1">
+              La description est requise
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">
+          <i class="bi bi-x-circle me-2"></i>Annuler
+        </button>
+        <button type="button"
+                class="btn btn-operation-submit"
+                [ngClass]="{
+                  'btn-success': operationType === 'VERSEMENT',
+                  'btn-warning': operationType === 'RETRAIT',
+                  'btn-info': operationType === 'VIREMENT'
+                }"
+                (click)="executeOperation()"
+                [disabled]="executingOperation">
+          <span *ngIf="!executingOperation">
+            <i class="bi bi-check-circle me-2"></i>Valider l'Opération
+          </span>
+          <span *ngIf="executingOperation">
+            <span class="spinner-border spinner-border-sm me-2"></span>Exécution...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showModalOperation" *ngIf="showModalOperation"></div>

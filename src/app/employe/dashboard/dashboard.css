@@ -1,0 +1,224 @@
+/* Dashboard Title */
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* Stat Cards */
+.stat-card {
+  border-radius: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  overflow: hidden;
+  position: relative;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+
+.stat-card .card-body {
+  padding: 2rem;
+}
+
+.stat-icon {
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+  opacity: 0.5;
+}
+
+/* Gradients modernisés */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+}
+
+.bg-gradient-success {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  box-shadow: 0 8px 24px rgba(240, 147, 251, 0.4);
+}
+
+.bg-gradient-info {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  box-shadow: 0 8px 24px rgba(79, 172, 254, 0.4);
+}
+
+.bg-gradient-light {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* Card styles */
+.card {
+  border-radius: 20px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.card-header {
+  border-bottom: none;
+  padding: 1.5rem;
+  border-radius: 20px 20px 0 0;
+  background: transparent;
+}
+
+/* Table styles */
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  border-bottom: 2px solid #e9ecef;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: #6c757d;
+  padding: 1rem;
+  letter-spacing: 0.5px;
+}
+
+.table tbody td {
+  padding: 1.2rem 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.operation-row {
+  transition: all 0.2s ease;
+}
+
+.operation-row:hover {
+  background-color: #f8f9fa;
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Badge moderne */
+.badge-modern {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.badge-danger {
+  background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+}
+
+/* Montant styling */
+.montant {
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+}
+
+/* Canvas */
+canvas {
+  max-height: 350px !important;
+  width: 100% !important;
+}
+
+/* Stats container */
+.stats-container {
+  gap: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .stats-container {
+    margin-top: 1rem;
+  }
+
+  .stat-card .card-body {
+    padding: 1.5rem;
+  }
+
+  .stat-card h1 {
+    font-size: 2.5rem;
+  }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Operations card */
+.operations-card {
+  margin-top: 2rem;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Spinner moderne */
+.spinner-border {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-width: 0.3rem;
+}
+
+/* Badge responsive */
+.badge {
+  font-size: 0.85rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+}
+
+/* Display numbers */
+.display-4 {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Icon spacing */
+.bi {
+  vertical-align: middle;
+}
+
+/* Table responsive */
+.table-responsive {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+/* Hover effects for badges */
+.badge:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}

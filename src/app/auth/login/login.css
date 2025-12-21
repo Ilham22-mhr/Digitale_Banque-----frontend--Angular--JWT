@@ -1,0 +1,41 @@
+.dashboard {
+  padding: 20px;
+}
+
+.stat-card {
+  border: none;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+  min-height: 120px;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+}
+
+.table th {
+  font-weight: 600;
+  color: #495057;
+  border-top: none;
+}
+
+.badge {
+  font-size: 0.8rem;
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 10px;
+  }
+
+  .stat-card .fs-1 {
+    font-size: 2rem !important;
+  }
+}
